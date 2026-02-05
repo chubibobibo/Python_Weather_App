@@ -11,13 +11,14 @@ class WeatherApp(QWidget):
         self.city_label = QLabel('Enter city name: ', self)
         self.city_input = QLineEdit(self)
         self.get_weather_button = QPushButton("Get Weather", self)
-        self.temperature_label = QLabel('35C', self)
-        self.emoji_label = QLabel('☀️', self)
-        self.description_label = QLabel('Sunny', self)
+        self.temperature_label = QLabel(self)
+        self.emoji_label = QLabel(self)
+        self.description_label = QLabel(self)
         self.initUI()
 
     # method to initialize the interface
     def initUI(self):
+        
         self.setWindowTitle('Weather App')
         #layout manager 
         vbox = QVBoxLayout()
@@ -52,13 +53,58 @@ class WeatherApp(QWidget):
         # NOTE: QLabel#city_label  selects QLabel that has a  "city_label" object name
         self.setStyleSheet("""
             QLabel, QPushButton {
-            font-family: calibri
+                font-family: calibri;
             }
-            QLabel#city_label {
-            
-            }
-        """)
 
+            QLabel#city_label {
+                font-size: 50px;
+                font-style: italic;
+            }
+
+            QLineEdit#city_input {
+                font-size: 40px;
+            }
+
+            QPushButton#get_weather_button{
+                font-size: 30px;
+                font-weight: bold
+            }
+
+            QLabel#temperature_label {
+                font-size: 75px;
+            }
+
+            QLabel#emoji_label {
+                font-size: 100px;
+                font-family: Segoe UI emoji;
+            }
+
+            QLabel#description_label {
+                font-size: 50px
+            }
+
+        """)
+        
+        # signal listener
+        self.get_weather_button.clicked.connect(self.get_weather)
+
+    def get_weather(self):
+        print('Getting weather from api...')
+        api_key = "661f40b7510beeb48bf0c439faf87066"
+        city = self.city_input.text() # obtains text in the text field
+        url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}'
+        response = requests .get(url)
+        data = response.json()
+        if data['cod'] == 200:
+            print('Everything is good to go')
+            self.display_weather
+
+    def display_error(self, err_message):
+        pass
+
+    #if no errors are returned
+    def display_weather(self, data):
+        print(data)
 
 
 
