@@ -93,18 +93,27 @@ class WeatherApp(QWidget):
         api_key = "661f40b7510beeb48bf0c439faf87066"
         city = self.city_input.text() # obtains text in the text field
         url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}'
-        response = requests .get(url)
-        data = response.json()
-        if data['cod'] == 200:
-            print('Everything is good to go')
-            self.display_weather
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status() # manually type this because try catch block does not normally catch http errors
+            data = response.json()
+            # print(data)
+            if data['cod'] == 200: 
+                self.display_weather(data)
+        except requests.exceptions.HTTPError:
+            pass
+        except requests.RequestException:
+            pass
+
+      
 
     def display_error(self, err_message):
         pass
 
     #if no errors are returned
     def display_weather(self, data):
-        print(data)
+        print(f'Here are the results: {data['weather']}')
 
 
 
