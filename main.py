@@ -101,10 +101,35 @@ class WeatherApp(QWidget):
             # print(data)
             if data['cod'] == 200: 
                 self.display_weather(data)
+        # Exception raised by the request module
         except requests.exceptions.HTTPError:
+            match response.status_code:
+                case 400:
+                    print('Bad Request\n Check your input')
+                case 401:
+                    print('Unauthorized')
+                case 403:
+                    print('Forbidden')
+                case 404:
+                    print('Not Found')
+                case _: #no cases match
+                    print('HTTP error occured')
+        except requests.exceptions.ConnectionError:
+            print('Connection Error\n Check your internet connection')
+            
+        except requests.exceptions.Timeout:
+            print('Time Out error\n The request timed out')
+            
+        except requests.exceptions.TooManyRedirects:
+            print('Too many redirects\n Check url')
+            
+
+        except requests.RequestException as req_err:
+            print(f'Request Error {req_err}')
             pass
-        except requests.RequestException:
-            pass
+
+        except Exception:
+            print('Something went  wrong')
 
       
 
