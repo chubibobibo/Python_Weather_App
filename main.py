@@ -100,45 +100,54 @@ class WeatherApp(QWidget):
             data = response.json()
             # print(data)
             if data['cod'] == 200: 
-                self.display_weather(data)
+                self.display_weather(data, city)
         # Exception raised by the request module
         except requests.exceptions.HTTPError:
             match response.status_code:
                 case 400:
-                    print('Bad Request\n Check your input')
+                    self.display_error('Bad Request:\nCheck your input')
                 case 401:
-                    print('Unauthorized')
+                    self.display_error('Unauthorized')
                 case 403:
-                    print('Forbidden')
+                    self.display_error('Forbidden')
                 case 404:
-                    print('Not Found')
+                    self.display_error('City Not Found')
                 case _: #no cases match
-                    print('HTTP error occured')
+                    self.display_error('HTTP error occurred')
         except requests.exceptions.ConnectionError:
-            print('Connection Error\n Check your internet connection')
+            print('Connection Error:\nCheck your internet connection')
             
         except requests.exceptions.Timeout:
-            print('Time Out error\n The request timed out')
+            print('Time Out error:\nThe request timed out')
             
         except requests.exceptions.TooManyRedirects:
-            print('Too many redirects\n Check url')
+            print('Too many redirects:\nCheck url')
             
 
         except requests.RequestException as req_err:
             print(f'Request Error {req_err}')
             pass
 
-        except Exception:
+        except Exception: # catch other exceptions
             print('Something went  wrong')
 
       
 
     def display_error(self, err_message):
-        pass
+        self.temperature_label.setStyleSheet('font-size: 30px')# styling the error appearing in the temperature label
+        self.temperature_label.setText(f'An exception occurred: \n{err_message}')
 
     #if no errors are returned
-    def display_weather(self, data):
+    def display_weather(self, data, city_data):
         print(f'Here are the results: {data['weather']}')
+        temperature_k = data['main']['temp']
+        temperature_c = temperature_k - 273.15
+        temperature_f = (temperature_k * 9/5) - 459.67
+        print(f'Here is the temperature in celsius: {temperature_c:.0f}C')
+        
+        # displaying result
+        self.temperature_label.setText(f'Here is the temperature for {city_data.capitalize()}:\n{temperature_c:.0f}C')
+        self.temperature_label.setStyleSheet('font-size: 30px')
 
 
 
