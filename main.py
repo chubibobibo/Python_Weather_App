@@ -1,6 +1,7 @@
 import sys
 import requests
 from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import( QApplication, QWidget, QLabel, QLineEdit, QPushButton, QMainWindow, QVBoxLayout)  
 
 # Subclass QWidget to customize your application's main window
@@ -98,7 +99,7 @@ class WeatherApp(QWidget):
             response = requests.get(url)
             response.raise_for_status() # manually type this because try catch block does not normally catch http errors
             data = response.json()
-            # print(data)
+            # print(data['weather'][0]['description'])
             if data['cod'] == 200: 
                 self.display_weather(data, city)
         # Exception raised by the request module
@@ -115,21 +116,25 @@ class WeatherApp(QWidget):
                 case _: #no cases match
                     self.display_error('HTTP error occurred')
         except requests.exceptions.ConnectionError:
-            print('Connection Error:\nCheck your internet connection')
+            # print('Connection Error:\nCheck your internet connection')
+            self.display_error('Connection Error:\nCheck your internet connection')
             
         except requests.exceptions.Timeout:
-            print('Time Out error:\nThe request timed out')
+            # print('Time Out error:\nThe request timed out')
+            self.display_error('Time Out error:\nThe request timed out')
+            
             
         except requests.exceptions.TooManyRedirects:
-            print('Too many redirects:\nCheck url')
+            # print('Too many redirects:\nCheck url')
+             self.display_error('Too many redirects:\nCheck url')
             
 
         except requests.RequestException as req_err:
             print(f'Request Error {req_err}')
-            pass
 
         except Exception: # catch other exceptions
-            print('Something went  wrong')
+            # print('Something went  wrong')
+            self.display_error('Something went  wrong')
 
       
 
@@ -146,8 +151,21 @@ class WeatherApp(QWidget):
         print(f'Here is the temperature in celsius: {temperature_c:.0f}C')
         
         # displaying result
+        # Temperature
+        self.temperature_label.setStyleSheet('font-size: 50px')
         self.temperature_label.setText(f'Here is the temperature for {city_data.capitalize()}:\n{temperature_c:.0f}C')
-        self.temperature_label.setStyleSheet('font-size: 30px')
+        # Weather description
+        self.description_label.setStyleSheet('font-size: 40px')
+        self.description_label.setText(data['weather'][0]['description'])
+        # Weather icon
+        icon = data['weather'][0]['icon']
+        icon_url = f'https://openweathermap.org/payload/api/media/file/{icon}.png'
+        icon_response = requests.get(icon_url)
+        # print(icon_response.content)
+        pixmap = QPixmap()
+        pixmap.loadFromData(icon_response.content)
+        self.emoji_label.setPixmap(pixmap)
+        self.emoji_label.show()
 
 
 
