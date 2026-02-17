@@ -89,7 +89,7 @@ class WeatherApp(QWidget):
         # signal listener
         self.get_weather_button.clicked.connect(self.get_weather)
 
-    def get_weather(self):
+    def get_weather(self, get_weather_icon):
         print('Getting weather from api...')
         api_key = "661f40b7510beeb48bf0c439faf87066"
         city = self.city_input.text() # obtains text in the text field
@@ -101,6 +101,7 @@ class WeatherApp(QWidget):
             data = response.json()
             # print(data['weather'][0]['description'])
             if data['cod'] == 200: 
+                self.get_weather_icon(data)
                 self.display_weather(data, city)
         # Exception raised by the request module
         except requests.exceptions.HTTPError:
@@ -141,6 +142,8 @@ class WeatherApp(QWidget):
     def display_error(self, err_message):
         self.temperature_label.setStyleSheet('font-size: 30px')# styling the error appearing in the temperature label
         self.temperature_label.setText(f'An exception occurred: \n{err_message}')
+        self.emoji_label.clear()
+        self.description_label.clear()
 
     #if no errors are returned
     def display_weather(self, data, city_data):
@@ -157,16 +160,28 @@ class WeatherApp(QWidget):
         # Weather description
         self.description_label.setStyleSheet('font-size: 40px')
         self.description_label.setText(data['weather'][0]['description'])
+       
         # Weather icon
-        icon = data['weather'][0]['icon']
-        icon_url = f'https://openweathermap.org/payload/api/media/file/{icon}.png'
-        icon_response = requests.get(icon_url)
+        #icon = data['weather'][0]['icon']
+        # Obtain icons based on weather
+        #icon_url = f'https://openweathermap.org/payload/api/media/file/{icon}.png'
+        #icon_response = requests.get(icon_url)
         # print(icon_response.content)
+        #pixmap = QPixmap() # display images
+        #pixmap.loadFromData(icon_response.content) # convert binary data from icon_response to image data that QT can use
+        #self.emoji_label.setPixmap(pixmap) # set the pixmap from converted image raw data
+        #self.emoji_label.show()
+
+    # @staticmethod #belongs to a class but does not require instance specific data
+    def get_weather_icon(self, data):
+        icon = data['weather'][0]['icon']
+        icon_url =  f'https://openweathermap.org/payload/api/media/file/{icon}.png'
+        icon_response = requests.get(icon_url)
         pixmap = QPixmap()
         pixmap.loadFromData(icon_response.content)
         self.emoji_label.setPixmap(pixmap)
         self.emoji_label.show()
-
+        self.emoji_label.setStyleSheet('background-color: lightgray; border-radius: 25px')
 
 
 
